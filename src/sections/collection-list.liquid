@@ -1,0 +1,91 @@
+<div class="container">
+  
+      {% if section.settings.title != blank %}
+        <h2 class="text-center">{{ section.settings.title | escape }}</h2>
+      {% endif %}
+  <div class="row">
+      {% for block in section.blocks limit: section.blocks.size %}
+          {% case section.blocks.size %}
+            {% when 1 %}
+              {%- assign column_size = 'col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3' -%}
+            {% when 2 %}
+              {%- assign column_size = 'col-md-6 col-sm-4' -%}
+            {% when 3 %}
+              {%- assign column_size = 'col-md-4 col-sm-4' -%}
+            {% else %}
+              {%- assign column_size = '' -%}
+          {% endcase %}
+        <div {{ block.shopify_attributes }} class="{{ column_size }}">
+          {%- assign collection = collections[block.settings.collection] -%}
+
+          <a href="{% if collection == empty %}#{% else %}{{ collection.url }}{% endif %}">
+            {% if collection.image != blank %}
+              {{ collection | img_url: '480x480' | img_tag: collection.title }}
+            {% elsif collection.products.first != blank %}
+              {{ collection.products.first | img_url: '480x480' | img_tag: collection.title }}
+            {% elsif collection == empty %}
+              {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+              {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg placeholder-svg--small' }}
+            {% endif %}
+
+            <p>
+              {% if collection == empty %}
+                {{ 'homepage.onboarding.collection_title' | t }}
+              {% else %}
+                {{ collection.title }}
+              {% endif %}
+            </p>
+          </a>
+        </div>
+      {% endfor %}
+
+      {% if section.blocks.size == 0 %}
+        {% include 'no-blocks' %}
+      {% endif %}
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Collection list",
+    "max_blocks": 3,
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Collection list"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection",
+        "name": "Collection",
+        "settings": [
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Collection list",
+        "category": "Collection",
+        "blocks": [
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
